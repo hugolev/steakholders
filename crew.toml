@@ -1,0 +1,42 @@
+# steakholders configuration. Everything an agent does is driven from here and from prompts/*.md.
+
+[server]
+base_url = "http://localhost:1234/v1"   # LM Studio > Developer > Start Server
+api_key = "lm-studio"                   # LM Studio ignores the value; the client needs one
+timeout_s = 900                         # local generations of whole files can be slow
+
+[defaults]
+# Exact model id as LM Studio reports it. Run `python -m crew models` to list them.
+model = ""
+temperature = 0.2
+max_tokens = 8192
+
+# Per-agent overrides. Any key from [defaults] can be overridden, including `model`.
+# On a single GPU keep one model for every agent: swapping models between calls costs
+# far more time than a specialist model saves. The roles differ by prompt and temperature.
+[agents.analyst]
+temperature = 0.3
+max_tokens = 3000
+
+[agents.architect]
+temperature = 0.2
+max_tokens = 4000
+
+[agents.coder]
+temperature = 0.1
+
+[agents.tester]
+temperature = 0.2
+
+[agents.debugger]
+temperature = 0.3       # slightly higher so repeated rounds do not produce the same fix
+
+[agents.reviewer]
+temperature = 0.2
+max_tokens = 2000
+
+[pipeline]
+max_fix_rounds = 5       # test -> debug cycles before giving up
+test_timeout_s = 120     # kills generated code that hangs
+use_venv = true          # isolate generated code's dependencies in <run>/.venv
+context_chars = 60000    # cap on source text pasted into one prompt (~15k tokens)
